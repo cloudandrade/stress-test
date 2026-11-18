@@ -6,7 +6,6 @@
   --border: #3a3c58;
   --accent: #4b6bfb;
   --accent-soft: rgb(75 107 251 / 14%);
-  --gain: #4ade80;
   --loss: #f87171;
   --warn: #fbbf24;
   --radius: 14px;
@@ -86,6 +85,12 @@ button {
 .stage-title {
   margin: 4px 0 24px;
   font-size: clamp(1.6rem, 4vw, 2.2rem);
+}
+
+.stage-back {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 16px;
 }
 
 .card {
@@ -333,109 +338,42 @@ button {
   font-style: italic;
 }
 
-.scoreboard {
-  position: fixed;
-  z-index: 10;
-  width: 220px;
-  background: var(--surface);
+.step-prompt {
+  font-size: 1.3rem;
+  font-weight: 600;
+}
+
+.fine-print {
+  font-size: 0.6rem;
+  color: var(--muted);
+  opacity: 0.55;
+  margin-top: 2px;
+}
+
+.text-input {
+  font-size: 1.05rem;
+  padding: 10px 12px;
+  border-radius: 8px;
   border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  text-align: left;
-}
-
-.scoreboard--top-right {
-  top: 16px;
-  right: 16px;
-}
-
-.scoreboard--top-left {
-  top: 16px;
-  left: 16px;
-}
-
-.scoreboard--bottom-right {
-  bottom: 16px;
-  right: 16px;
-}
-
-.scoreboard--bottom-left {
-  bottom: 16px;
-  left: 16px;
-}
-
-.scoreboard-label {
-  font-size: 0.7rem;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  color: var(--muted);
-}
-
-.scoreboard-total {
-  font-size: 2rem;
-  font-variant-numeric: tabular-nums;
-}
-
-.scoreboard-events {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  font-size: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.gain {
-  color: var(--gain);
-}
-
-.loss {
-  color: var(--loss);
-}
-
-.support-chat {
-  position: fixed;
-  z-index: 20;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(380px, calc(100% - 32px));
-  background: var(--surface);
-  border: 1px solid var(--accent);
-  border-radius: var(--radius);
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  text-align: left;
-  box-shadow: 0 12px 40px rgb(0 0 0 / 50%);
-}
-
-.support-chat p {
-  margin: 0;
-}
-
-.support-chat-agent {
-  font-size: 0.75rem;
-  color: var(--muted);
+  background: var(--bg);
+  color: var(--text);
 }
 
 @media (max-width: 640px) {
-  .scoreboard {
-    width: 150px;
-    padding: 8px 10px;
-  }
-
-  .scoreboard-events {
-    display: none;
-  }
-
   .btn {
     min-width: 0;
     flex: 1 1 40%;
+  }
+}
+
+@media (max-width: 768px) {
+  .actions--stacked-mobile {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .actions--stacked-mobile .btn {
+    flex: none;
+    width: 100%;
   }
 }

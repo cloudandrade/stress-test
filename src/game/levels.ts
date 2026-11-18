@@ -14,7 +14,7 @@ import type { Level } from './types'
 
 export const LEVELS: Level[] = [
   { id: 'cookies', title: 'Antes de tudo, os cookies', reward: 10, Component: CookieLevel },
-  { id: 'name', title: 'Digite o seu nome', reward: 15, Component: NameLevel },
+  { id: 'name', title: 'Identificação', reward: 15, Component: NameLevel },
   { id: 'terms', title: 'Termos e condições', reward: 15, Component: TermsLevel },
   { id: 'password', title: 'Crie uma senha segura', reward: 25, Component: PasswordLevel },
   { id: 'country', title: 'Onde você mora?', reward: 15, Component: CountryLevel },

@@ -1,42 +1,37 @@
-import { useEffect, useReducer, useState } from 'react'
-import { ScoreBoard, type ScoreBoardCorner } from '../score/ScoreBoard'
+import { useReducer, useRef, useState } from 'react'
 import { initialScoreState, scoreReducer } from '../score/scoreReducer'
+import { useScoreLog } from '../score/useScoreLog'
+import { ActionButton } from '../ui/ActionButton'
+import { useEnterTriggersCta } from '../ui/useEnterTriggersCta'
 import { useIsMobile } from '../ui/useIsMobile'
 import { LEVELS } from './levels'
 import { SiteHeader } from './SiteHeader'
-import { SupportChat } from './SupportChat'
 
-const SCOREBOARD_CORNERS: ScoreBoardCorner[] = ['top-right', 'bottom-left', 'top-left', 'bottom-right']
 const LEVELS_AHEAD_SHOWN = 1
-const SUPPORT_CHAT_DELAY_MS = 7000
+const BACK_PENALTY = 3
 
 export function Game() {
+  const stageRef = useRef<HTMLElement>(null)
   const [score, dispatch] = useReducer(scoreReducer, initialScoreState)
   const [levelIndex, setLevelIndex] = useState(0)
+  const [rewardedLevelIds, setRewardedLevelIds] = useState<ReadonlySet<string>>(new Set())
   const [playerName, setPlayerName] = useState('')
-  const [isChatOpen, setIsChatOpen] = useState(false)
   const isMobile = useIsMobile()
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => setIsChatOpen(true), SUPPORT_CHAT_DELAY_MS)
-    return () => clearTimeout(timeoutId)
-  }, [levelIndex])
+  useScoreLog(score)
+  useEnterTriggersCta(stageRef)
 
   const level = LEVELS[levelIndex]
+  const isFirstLevel = levelIndex === 0
   const isLastLevel = levelIndex === LEVELS.length - 1
   const levelNumber = levelIndex + 1
   const advertisedTotal = Math.min(levelNumber + LEVELS_AHEAD_SHOWN, LEVELS.length)
-  const corner = SCOREBOARD_CORNERS[levelIndex % SCOREBOARD_CORNERS.length]
-
-  const goToLevel = (nextLevelIndex: number) => {
-    setIsChatOpen(false)
-    setLevelIndex(nextLevelIndex)
-  }
 
   const restart = () => {
     dispatch({ type: 'reset' })
+    setRewardedLevelIds(new Set())
     setPlayerName('')
-    goToLevel(0)
+    setLevelIndex(0)
   }
 
   const handleComplete = () => {
@@ -44,12 +39,20 @@ export function Game() {
       restart()
       return
     }
-    dispatch({ type: 'award', points: level.reward, reason: level.title })
-    goToLevel(levelIndex + 1)
+    if (!rewardedLevelIds.has(level.id)) {
+      dispatch({ type: 'award', points: level.reward, reason: level.title })
+      setRewardedLevelIds(new Set(rewardedLevelIds).add(level.id))
+    }
+    setLevelIndex(levelIndex + 1)
   }
 
   const handlePenalty = (reason: string, points: number) => {
     dispatch({ type: 'penalize', points, reason })
+  }
+
+  const handleBack = () => {
+    handlePenalty('Voltou uma fase', BACK_PENALTY)
+    setLevelIndex(levelIndex - 1)
   }
 
   const activeVariant = isMobile && level.mobileVariant ? level.mobileVariant : level
@@ -58,9 +61,8 @@ export function Game() {
 
   return (
     <div className="app">
-      <SiteHeader onPenalty={handlePenalty} onHelp={() => setIsChatOpen(true)} />
-      <ScoreBoard score={score} corner={corner} />
-      <main className="stage">
+      <SiteHeader onPenalty={handlePenalty} />
+      <main ref={stageRef} className="stage">
         <p className="stage-progress">
           Fase {levelNumber} de {advertisedTotal}
         </p>
@@ -73,8 +75,14 @@ export function Game() {
           onPenalty={handlePenalty}
           onPlayerNameChange={setPlayerName}
         />
+        {!isFirstLevel && (
+          <div className="stage-back">
+            <ActionButton icon="back" onClick={handleBack}>
+              Voltar
+            </ActionButton>
+          </div>
+        )}
       </main>
-      {isChatOpen && <SupportChat onClose={() => setIsChatOpen(false)} onPenalty={handlePenalty} />}
     </div>
   )
 }

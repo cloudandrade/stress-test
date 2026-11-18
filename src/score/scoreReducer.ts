@@ -1,4 +1,4 @@
-export const MAX_VISIBLE_EVENTS = 5
+export const MAX_STORED_EVENTS = 5
 
 export type ScoreEvent = {
   id: number
@@ -27,7 +27,7 @@ function addEvent(state: ScoreState, points: number, reason: string): ScoreState
   const event: ScoreEvent = { id: state.nextEventId, points, reason }
   return {
     total: state.total + points,
-    events: [event, ...state.events].slice(0, MAX_VISIBLE_EVENTS),
+    events: [event, ...state.events].slice(0, MAX_STORED_EVENTS),
     nextEventId: state.nextEventId + 1,
   }
 }

@@ -1,124 +1,111 @@
 import { useState, type FormEvent } from 'react'
 import type { LevelProps } from '../game/types'
 import { ActionButton } from '../ui/ActionButton'
-import { suggestName } from './name'
+import { garbleName } from './name'
 
 const MIN_NAME_LENGTH = 2
-const MAX_BUTTON_SWAPS = 3
-const OBEY_PENALTY = 3
-const AUTOCORRECT_PENALTY = 2
+const ERASE_PENALTY = 3
+const WRONG_NAME_PENALTY = 5
 
-type NameStep = 'typing' | 'suggesting' | 'confirming'
+type TypingStep = 'pet' | 'firstName' | 'lastName'
+
+type TypingStepConfig = {
+  prompt: string
+  finePrint?: string
+  next: TypingStep | 'confirming'
+}
+
+const TYPING_STEPS: Record<TypingStep, TypingStepConfig> = {
+  pet: { prompt: 'Digite o nome', finePrint: 'do seu animal de estimação', next: 'firstName' },
+  firstName: { prompt: 'Agora digite o seu nome', next: 'lastName' },
+  lastName: { prompt: 'Agora digite o seu sobrenome', next: 'confirming' },
+}
+
+type NameAnswers = Record<TypingStep, string>
+
+const EMPTY_ANSWERS: NameAnswers = { pet: '', firstName: '', lastName: '' }
 
 export function NameLevel({ onComplete, onPenalty, onPlayerNameChange }: LevelProps) {
-  const [name, setName] = useState('')
-  const [step, setStep] = useState<NameStep>('typing')
-  const [swapCount, setSwapCount] = useState(0)
+  const [step, setStep] = useState<TypingStep | 'confirming'>('pet')
+  const [answers, setAnswers] = useState(EMPTY_ANSWERS)
+  const [draft, setDraft] = useState('')
   const [error, setError] = useState('')
 
-  const trimmedName = name.trim()
-  const areButtonsSwapped = (swapCount + name.length) % 2 === 1
+  if (step === 'confirming') {
+    const garbledName = garbleName(answers.firstName, answers.pet, answers.lastName)
 
-  const handleErase = () => {
-    setName('')
-    setError('')
-    onPenalty('Apagou o próprio nome', OBEY_PENALTY)
+    const handleProceed = () => {
+      onPenalty('Aceitou um nome que não é seu', WRONG_NAME_PENALTY)
+      onPlayerNameChange(garbledName)
+      onComplete()
+    }
+
+    const handleFix = () => {
+      onPlayerNameChange(answers.firstName)
+      onComplete()
+    }
+
+    return (
+      <div className="card">
+        <p className="step-prompt">
+          Seu nome é <strong>{garbledName}</strong>?
+        </p>
+        <div className="actions">
+          <ActionButton onClick={handleFix}>Não, corrigir</ActionButton>
+          <ActionButton tone="loud" icon="next" onClick={handleProceed}>
+            Sim, prosseguir
+          </ActionButton>
+        </div>
+      </div>
+    )
   }
 
-  const handleAdvanceHover = () => {
-    if (swapCount < MAX_BUTTON_SWAPS) {
-      setSwapCount(swapCount + 1)
-    }
+  const stepConfig = TYPING_STEPS[step]
+  const trimmedDraft = draft.trim()
+
+  const handleErase = () => {
+    setDraft('')
+    setError('')
+    onPenalty('Apagou o que tinha digitado', ERASE_PENALTY)
   }
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    if (trimmedName.length < MIN_NAME_LENGTH) {
+    if (trimmedDraft.length < MIN_NAME_LENGTH) {
       setError('Isso não é um nome, é uma inicial.')
       return
     }
+    setAnswers({ ...answers, [step]: trimmedDraft })
+    setDraft('')
     setError('')
-    setStep('suggesting')
+    setStep(stepConfig.next)
   }
-
-  const handleAcceptSuggestion = () => {
-    setName(suggestName(trimmedName))
-    setStep('confirming')
-    onPenalty('Aceitou o corretor automático', AUTOCORRECT_PENALTY)
-  }
-
-  const handleReportWrongName = () => {
-    setName('')
-    setStep('typing')
-    onPenalty('Disse que o próprio nome está errado', OBEY_PENALTY)
-  }
-
-  const handleConfirm = () => {
-    onPlayerNameChange(trimmedName)
-    onComplete()
-  }
-
-  if (step === 'suggesting') {
-    return (
-      <div className="card">
-        <p>
-          Você quis dizer <strong>“{suggestName(trimmedName)}”</strong>?
-        </p>
-        <div className="actions">
-          <ActionButton onClick={() => setStep('confirming')}>Não, manter</ActionButton>
-          <ActionButton tone="loud" icon="next" onClick={handleAcceptSuggestion}>
-            Sim, corrigir
-          </ActionButton>
-        </div>
-      </div>
-    )
-  }
-
-  if (step === 'confirming') {
-    return (
-      <div className="card">
-        <p>
-          Seu nome <strong>“{trimmedName}”</strong> está errado?
-        </p>
-        <div className="actions">
-          <ActionButton tone="loud" icon="check" onClick={handleReportWrongName}>
-            Sim
-          </ActionButton>
-          <ActionButton onClick={handleConfirm}>Não</ActionButton>
-        </div>
-      </div>
-    )
-  }
-
-  const eraseButton = (
-    <ActionButton key="erase" tone="loud" icon="next" onClick={handleErase}>
-      Apagar
-    </ActionButton>
-  )
-  const advanceButton = (
-    <ActionButton key="advance" type="submit" onMouseEnter={handleAdvanceHover}>
-      Avançar
-    </ActionButton>
-  )
-  const buttons = areButtonsSwapped ? [advanceButton, eraseButton] : [eraseButton, advanceButton]
 
   return (
-    <form className="card" onSubmit={handleSubmit}>
-      <label className="field">
-        <span>Nome (o completo, mas sem sobrenome)</span>
-        <input
-          value={name}
-          onChange={(event) => setName(event.target.value)}
-          placeholder="Ex.: o seu, não o do seu cachorro"
-          autoComplete="off"
-        />
-      </label>
+    <form key={step} className="card" onSubmit={handleSubmit}>
+      <div>
+        <p className="step-prompt">{stepConfig.prompt}</p>
+        {stepConfig.finePrint && <p className="fine-print">{stepConfig.finePrint}</p>}
+      </div>
+      <input
+        className="text-input"
+        aria-label={stepConfig.finePrint ? `${stepConfig.prompt} ${stepConfig.finePrint}` : stepConfig.prompt}
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
+        autoComplete="off"
+        autoFocus
+      />
       {error && (
         <p className="error" role="alert">
           {error}
         </p>
       )}
-      <div className="actions">{buttons}</div>
+      <div className="actions">
+        <ActionButton type="submit">Avançar</ActionButton>
+        <ActionButton tone="loud" icon="next" onClick={handleErase}>
+          Apagar
+        </ActionButton>
+      </div>
     </form>
   )
 }

@@ -23,7 +23,12 @@ export function ActionButton({
   ...buttonProps
 }: ActionButtonProps) {
   return (
-    <button type={type} className={`btn btn--${tone} ${className}`.trim()} {...buttonProps}>
+    <button
+      type={type}
+      className={`btn btn--${tone} ${className}`.trim()}
+      data-cta={tone === 'loud' ? '' : undefined}
+      {...buttonProps}
+    >
       {children}
       {icon && (
         <span className="btn-icon" aria-hidden="true">

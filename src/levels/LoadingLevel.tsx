@@ -8,7 +8,7 @@ const HOLD_DURATION_MS = 3000
 const HOLD_TICK_MS = 100
 const SPEED_UP_PENALTY = 6
 const PERCENT = 100
-const HOLD_KEYS = new Set([' ', 'Enter'])
+const HOLD_KEY = ' '
 
 export function LoadingLevel({ onComplete, onPenalty }: LevelProps) {
   const [loading, dispatch] = useReducer(loadingReducer, initialLoadingState)
@@ -53,14 +53,14 @@ export function LoadingLevel({ onComplete, onPenalty }: LevelProps) {
   }
 
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
-    if (HOLD_KEYS.has(event.key) && !event.repeat) {
+    if (event.key === HOLD_KEY && !event.repeat) {
       event.preventDefault()
       startHolding()
     }
   }
 
   const handleKeyUp = (event: KeyboardEvent<HTMLButtonElement>) => {
-    if (HOLD_KEYS.has(event.key)) {
+    if (event.key === HOLD_KEY) {
       stopHolding()
     }
   }

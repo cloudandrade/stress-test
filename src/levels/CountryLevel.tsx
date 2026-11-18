@@ -49,10 +49,10 @@ export function CountryLevel({ onComplete, onPenalty }: LevelProps) {
         </p>
       )}
       <div className="actions">
+        <ActionButton onClick={handleConfirm}>Confirmar país</ActionButton>
         <ActionButton tone="loud" icon="next" onClick={handleAutoDetect}>
           Detectar automaticamente
         </ActionButton>
-        <ActionButton onClick={handleConfirm}>Confirmar país</ActionButton>
       </div>
     </div>
   )

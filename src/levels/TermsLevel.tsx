@@ -98,15 +98,15 @@ export function TermsLevel({ onComplete, onPenalty }: LevelProps) {
         </p>
       )}
       <div className="actions">
-        <ActionButton tone="loud" icon="next" onClick={handleKeepReading}>
-          Continuar lendo
-        </ActionButton>
         <ActionButton
           className={canContinue ? '' : 'btn--disabled-look'}
           aria-disabled={!canContinue}
           onClick={handleContinue}
         >
           Continuar
+        </ActionButton>
+        <ActionButton tone="loud" icon="next" onClick={handleKeepReading}>
+          Continuar lendo
         </ActionButton>
       </div>
     </div>

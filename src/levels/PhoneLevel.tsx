@@ -66,10 +66,10 @@ export function PhoneLevel({ onComplete, onPenalty }: LevelProps) {
       )}
       <div className="actions">
         <ActionButton onClick={() => setLocalNumber(randomLocalNumber())}>🎲 Sortear</ActionButton>
+        <ActionButton onClick={handleConfirm}>Confirmar</ActionButton>
         <ActionButton tone="loud" icon="next" onClick={() => onPenalty('Tentou pular o telefone', SKIP_PENALTY)}>
           Próximo
         </ActionButton>
-        <ActionButton onClick={handleConfirm}>Confirmar</ActionButton>
       </div>
     </div>
   )

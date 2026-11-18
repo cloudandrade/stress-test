@@ -64,10 +64,10 @@ export function VolumeLevel({ onComplete, onPenalty }: LevelProps) {
         </p>
       )}
       <div className="actions">
+        <ActionButton onClick={handleConfirm}>Confirmar</ActionButton>
         <ActionButton tone="loud" icon="check" onClick={handleMute}>
           Aplicar
         </ActionButton>
-        <ActionButton onClick={handleConfirm}>Confirmar</ActionButton>
       </div>
     </div>
   )
