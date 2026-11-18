@@ -1,11 +1,14 @@
 import { useState, type FormEvent } from 'react'
 import type { LevelProps } from '../game/types'
+import { ActionButton } from '../ui/ActionButton'
+import { suggestName } from './name'
 
 const MIN_NAME_LENGTH = 2
 const MAX_BUTTON_SWAPS = 3
 const OBEY_PENALTY = 3
+const AUTOCORRECT_PENALTY = 2
 
-type NameStep = 'typing' | 'confirming'
+type NameStep = 'typing' | 'suggesting' | 'confirming'
 
 export function NameLevel({ onComplete, onPenalty, onPlayerNameChange }: LevelProps) {
   const [name, setName] = useState('')
@@ -19,7 +22,7 @@ export function NameLevel({ onComplete, onPenalty, onPlayerNameChange }: LevelPr
   const handleErase = () => {
     setName('')
     setError('')
-    onPenalty('Obedeceu ao botão bonito', OBEY_PENALTY)
+    onPenalty('Apagou o próprio nome', OBEY_PENALTY)
   }
 
   const handleAdvanceHover = () => {
@@ -35,13 +38,19 @@ export function NameLevel({ onComplete, onPenalty, onPlayerNameChange }: LevelPr
       return
     }
     setError('')
-    setStep('confirming')
+    setStep('suggesting')
   }
 
-  const handleDeny = () => {
+  const handleAcceptSuggestion = () => {
+    setName(suggestName(trimmedName))
+    setStep('confirming')
+    onPenalty('Aceitou o corretor automático', AUTOCORRECT_PENALTY)
+  }
+
+  const handleReportWrongName = () => {
     setName('')
     setStep('typing')
-    onPenalty('Errou o próprio nome', OBEY_PENALTY)
+    onPenalty('Disse que o próprio nome está errado', OBEY_PENALTY)
   }
 
   const handleConfirm = () => {
@@ -49,33 +58,47 @@ export function NameLevel({ onComplete, onPenalty, onPlayerNameChange }: LevelPr
     onComplete()
   }
 
+  if (step === 'suggesting') {
+    return (
+      <div className="card">
+        <p>
+          Você quis dizer <strong>“{suggestName(trimmedName)}”</strong>?
+        </p>
+        <div className="actions">
+          <ActionButton onClick={() => setStep('confirming')}>Não, manter</ActionButton>
+          <ActionButton tone="loud" icon="next" onClick={handleAcceptSuggestion}>
+            Sim, corrigir
+          </ActionButton>
+        </div>
+      </div>
+    )
+  }
+
   if (step === 'confirming') {
     return (
       <div className="card">
         <p>
-          Seu nome é mesmo <strong>“{trimmedName}”</strong>? Parece nome de vilão de novela.
+          Seu nome <strong>“{trimmedName}”</strong> está errado?
         </p>
         <div className="actions">
-          <button type="button" className="cta" onClick={handleDeny}>
-            Não, errei
-          </button>
-          <button type="button" className="neutral" onClick={handleConfirm}>
-            Sim, é esse
-          </button>
+          <ActionButton tone="loud" icon="check" onClick={handleReportWrongName}>
+            Sim
+          </ActionButton>
+          <ActionButton onClick={handleConfirm}>Não</ActionButton>
         </div>
       </div>
     )
   }
 
   const eraseButton = (
-    <button key="erase" type="button" className="cta cta--huge" onClick={handleErase}>
+    <ActionButton key="erase" tone="loud" icon="next" onClick={handleErase}>
       Apagar
-    </button>
+    </ActionButton>
   )
   const advanceButton = (
-    <button key="advance" type="submit" className="neutral" onMouseEnter={handleAdvanceHover}>
+    <ActionButton key="advance" type="submit" onMouseEnter={handleAdvanceHover}>
       Avançar
-    </button>
+    </ActionButton>
   )
   const buttons = areButtonsSwapped ? [advanceButton, eraseButton] : [eraseButton, advanceButton]
 

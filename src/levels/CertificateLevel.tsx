@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type { LevelProps } from '../game/types'
+import { ActionButton } from '../ui/ActionButton'
 import { misspellName, rankFor } from './certificate'
 
 const SHARE_PENALTY = 1
@@ -18,15 +19,11 @@ export function CertificateLevel({ playerName, score, onComplete, onPenalty }: L
       </p>
       {hasReportedName && <p className="hint">Erro registrado. Prazo para correção: 180 dias úteis.</p>}
       <div className="actions">
-        <button type="button" className="cta" onClick={() => onPenalty('Quase postou isso no LinkedIn', SHARE_PENALTY)}>
-          Compartilhar no LinkedIn
-        </button>
-        <button type="button" className="neutral" onClick={() => setHasReportedName(true)}>
-          Meu nome está errado
-        </button>
-        <button type="button" className="neutral" onClick={onComplete}>
-          Jogar de novo
-        </button>
+        <ActionButton tone="loud" icon="next" onClick={() => onPenalty('Quase postou isso no LinkedIn', SHARE_PENALTY)}>
+          Compartilhar
+        </ActionButton>
+        <ActionButton onClick={() => setHasReportedName(true)}>Meu nome está errado</ActionButton>
+        <ActionButton onClick={onComplete}>Jogar de novo</ActionButton>
       </div>
     </div>
   )

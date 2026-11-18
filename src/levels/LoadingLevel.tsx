@@ -1,11 +1,12 @@
 import { useEffect, useReducer, useState, type KeyboardEvent } from 'react'
 import type { LevelProps } from '../game/types'
+import { ActionButton } from '../ui/ActionButton'
 import { initialLoadingState, loadingReducer } from './loadingReducer'
 
-export const TICK_MS = 80
-export const HOLD_DURATION_MS = 3000
+const TICK_MS = 80
+const HOLD_DURATION_MS = 3000
 const HOLD_TICK_MS = 100
-const CANCEL_PENALTY = 6
+const SPEED_UP_PENALTY = 6
 const PERCENT = 100
 const HOLD_KEYS = new Set([' ', 'Enter'])
 
@@ -64,11 +65,11 @@ export function LoadingLevel({ onComplete, onPenalty }: LevelProps) {
     }
   }
 
-  const handleCancel = () => {
+  const handleSpeedUp = () => {
     dispatch({ type: 'restart' })
     setIsHolding(false)
     setHoldElapsed(0)
-    onPenalty('Cancelou o salvamento', CANCEL_PENALTY)
+    onPenalty('Tentou acelerar e reiniciou tudo', SPEED_UP_PENALTY)
   }
 
   const holdPercent = Math.round((holdElapsed / HOLD_DURATION_MS) * PERCENT)
@@ -93,9 +94,8 @@ export function LoadingLevel({ onComplete, onPenalty }: LevelProps) {
         <>
           <p>Travou no 99%. Segure o botão por 3 segundos para empurrar o último 1%.</p>
           {releasedEarly && <p className="error">Soltou cedo demais! Do zero.</p>}
-          <button
-            type="button"
-            className="neutral hold-button"
+          <ActionButton
+            className="hold-button"
             onPointerDown={startHolding}
             onPointerUp={stopHolding}
             onPointerLeave={stopHolding}
@@ -103,13 +103,13 @@ export function LoadingLevel({ onComplete, onPenalty }: LevelProps) {
             onKeyUp={handleKeyUp}
           >
             Segure para empurrar ({holdPercent}%)
-          </button>
+          </ActionButton>
         </>
       )}
       <div className="actions">
-        <button type="button" className="cta" onClick={handleCancel}>
-          Cancelar
-        </button>
+        <ActionButton tone="loud" icon="next" onClick={handleSpeedUp}>
+          Acelerar
+        </ActionButton>
       </div>
     </div>
   )

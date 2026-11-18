@@ -1,23 +1,16 @@
 import { useState } from 'react'
 import type { LevelProps } from '../game/types'
+import { ActionButton } from '../ui/ActionButton'
 
 const ESCAPES_UNTIL_TIRED = 7
-const MAX_OFFSET_PERCENT = 75
-const GIVE_UP_PENALTY = 5
+const MAX_OFFSET_PERCENT = 70
+const WRONG_BUTTON_PENALTY = 4
 
-const TAUNTS = [
-  'Clique em mim',
-  'Quase!',
-  'Errou 😜',
-  'Tá lento hein',
-  'Aqui ó',
-  'Mais rápido!',
-  'Cansando...',
-]
+const TAUNTS = ['Continuar', 'Quase!', 'Errou 😜', 'Tá lento hein', 'Aqui ó', 'Mais rápido!', 'Cansando...']
 
 type Position = { left: number; top: number }
 
-const INITIAL_POSITION: Position = { left: 40, top: 40 }
+const INITIAL_POSITION: Position = { left: 35, top: 40 }
 
 function randomPosition(): Position {
   return {
@@ -40,7 +33,7 @@ export function FleeingButtonLevel({ onComplete, onPenalty }: LevelProps) {
     setPosition(randomPosition())
   }
 
-  const handleClick = () => {
+  const handleFleeingClick = () => {
     if (isTired) {
       onComplete()
       return
@@ -50,21 +43,26 @@ export function FleeingButtonLevel({ onComplete, onPenalty }: LevelProps) {
 
   return (
     <div className="card">
-      <p>É só clicar no botão cinza. Fácil, né?</p>
+      <p>Clique em Continuar. Só isso.</p>
       <div className="arena">
-        <button
-          type="button"
-          className="neutral fleeing"
+        <ActionButton
+          className="fleeing"
           style={{ left: `${position.left}%`, top: `${position.top}%` }}
           onMouseEnter={flee}
-          onClick={handleClick}
+          onClick={handleFleeingClick}
         >
           {isTired ? 'Tá bom, pode clicar 😮‍💨' : TAUNTS[escapeCount]}
-        </button>
+        </ActionButton>
       </div>
-      <button type="button" className="cta" onClick={() => onPenalty('Pensou em desistir', GIVE_UP_PENALTY)}>
-        Desistir
-      </button>
+      <div className="actions">
+        <ActionButton
+          tone="loud"
+          icon="next"
+          onClick={() => onPenalty('Clicou no Continuar errado', WRONG_BUTTON_PENALTY)}
+        >
+          Continuar
+        </ActionButton>
+      </div>
     </div>
   )
 }

@@ -1,15 +1,24 @@
-import { useReducer, useState } from 'react'
+import { useEffect, useReducer, useState } from 'react'
 import { ScoreBoard, type ScoreBoardCorner } from '../score/ScoreBoard'
 import { initialScoreState, scoreReducer } from '../score/scoreReducer'
 import { LEVELS } from './levels'
+import { SiteHeader } from './SiteHeader'
+import { SupportChat } from './SupportChat'
 
 const SCOREBOARD_CORNERS: ScoreBoardCorner[] = ['top-right', 'bottom-left', 'top-left', 'bottom-right']
 const LEVELS_AHEAD_SHOWN = 1
+const SUPPORT_CHAT_DELAY_MS = 7000
 
 export function Game() {
   const [score, dispatch] = useReducer(scoreReducer, initialScoreState)
   const [levelIndex, setLevelIndex] = useState(0)
   const [playerName, setPlayerName] = useState('')
+  const [isChatOpen, setIsChatOpen] = useState(false)
+
+  useEffect(() => {
+    const timeoutId = setTimeout(() => setIsChatOpen(true), SUPPORT_CHAT_DELAY_MS)
+    return () => clearTimeout(timeoutId)
+  }, [levelIndex])
 
   const level = LEVELS[levelIndex]
   const isLastLevel = levelIndex === LEVELS.length - 1
@@ -17,10 +26,15 @@ export function Game() {
   const advertisedTotal = Math.min(levelNumber + LEVELS_AHEAD_SHOWN, LEVELS.length)
   const corner = SCOREBOARD_CORNERS[levelIndex % SCOREBOARD_CORNERS.length]
 
+  const goToLevel = (nextLevelIndex: number) => {
+    setIsChatOpen(false)
+    setLevelIndex(nextLevelIndex)
+  }
+
   const restart = () => {
     dispatch({ type: 'reset' })
     setPlayerName('')
-    setLevelIndex(0)
+    goToLevel(0)
   }
 
   const handleComplete = () => {
@@ -29,7 +43,7 @@ export function Game() {
       return
     }
     dispatch({ type: 'award', points: level.reward, reason: level.title })
-    setLevelIndex(levelIndex + 1)
+    goToLevel(levelIndex + 1)
   }
 
   const handlePenalty = (reason: string, points: number) => {
@@ -40,6 +54,7 @@ export function Game() {
 
   return (
     <div className="app">
+      <SiteHeader onPenalty={handlePenalty} onHelp={() => setIsChatOpen(true)} />
       <ScoreBoard score={score} corner={corner} />
       <main className="stage">
         <p className="stage-progress">
@@ -55,6 +70,7 @@ export function Game() {
           onPlayerNameChange={setPlayerName}
         />
       </main>
+      {isChatOpen && <SupportChat onClose={() => setIsChatOpen(false)} onPenalty={handlePenalty} />}
     </div>
   )
 }

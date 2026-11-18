@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import type { LevelProps } from '../game/types'
+import { ActionButton } from '../ui/ActionButton'
 
 const WRONG_ANSWER_PENALTY = 2
+const SKIP_PENALTY = 3
 const TRAFFIC_LIGHT = '🚦'
 
 type CaptchaRound = {
@@ -87,9 +89,10 @@ export function CaptchaLevel({ onComplete, onPenalty }: LevelProps) {
         </p>
       )}
       <div className="actions">
-        <button type="button" className="neutral" onClick={handleVerify}>
-          Verificar
-        </button>
+        <ActionButton onClick={handleVerify}>Verificar</ActionButton>
+        <ActionButton tone="loud" icon="next" onClick={() => onPenalty('Tentou pular o captcha', SKIP_PENALTY)}>
+          Avançar
+        </ActionButton>
       </div>
     </div>
   )
