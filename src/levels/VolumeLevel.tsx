@@ -53,6 +53,8 @@ export function VolumeLevel({ onComplete, onPenalty }: LevelProps) {
         value={sliderPosition}
         onChange={(event) => setSliderPosition(Number(event.target.value))}
         onPointerUp={commitVolume}
+        onPointerCancel={commitVolume}
+        onTouchEnd={commitVolume}
         onKeyUp={commitVolume}
         onBlur={commitVolume}
       />

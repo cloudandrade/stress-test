@@ -8,9 +8,13 @@ export type LevelProps = {
   onPlayerNameChange: (name: string) => void
 }
 
-export type Level = {
-  id: string
+export type LevelVariant = {
   title: string
-  reward: number
   Component: ComponentType<LevelProps>
+}
+
+export type Level = LevelVariant & {
+  id: string
+  reward: number
+  mobileVariant?: LevelVariant
 }

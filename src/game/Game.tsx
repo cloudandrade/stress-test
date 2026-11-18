@@ -1,6 +1,7 @@
 import { useEffect, useReducer, useState } from 'react'
 import { ScoreBoard, type ScoreBoardCorner } from '../score/ScoreBoard'
 import { initialScoreState, scoreReducer } from '../score/scoreReducer'
+import { useIsMobile } from '../ui/useIsMobile'
 import { LEVELS } from './levels'
 import { SiteHeader } from './SiteHeader'
 import { SupportChat } from './SupportChat'
@@ -14,6 +15,7 @@ export function Game() {
   const [levelIndex, setLevelIndex] = useState(0)
   const [playerName, setPlayerName] = useState('')
   const [isChatOpen, setIsChatOpen] = useState(false)
+  const isMobile = useIsMobile()
 
   useEffect(() => {
     const timeoutId = setTimeout(() => setIsChatOpen(true), SUPPORT_CHAT_DELAY_MS)
@@ -50,7 +52,9 @@ export function Game() {
     dispatch({ type: 'penalize', points, reason })
   }
 
-  const LevelComponent = level.Component
+  const activeVariant = isMobile && level.mobileVariant ? level.mobileVariant : level
+  const variantKey = activeVariant === level ? level.id : `${level.id}-mobile`
+  const LevelComponent = activeVariant.Component
 
   return (
     <div className="app">
@@ -60,9 +64,9 @@ export function Game() {
         <p className="stage-progress">
           Fase {levelNumber} de {advertisedTotal}
         </p>
-        <h1 className="stage-title">{level.title}</h1>
+        <h1 className="stage-title">{activeVariant.title}</h1>
         <LevelComponent
-          key={level.id}
+          key={variantKey}
           playerName={playerName}
           score={score.total}
           onComplete={handleComplete}

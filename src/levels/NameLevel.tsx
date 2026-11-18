@@ -17,7 +17,7 @@ export function NameLevel({ onComplete, onPenalty, onPlayerNameChange }: LevelPr
   const [error, setError] = useState('')
 
   const trimmedName = name.trim()
-  const areButtonsSwapped = swapCount % 2 === 1
+  const areButtonsSwapped = (swapCount + name.length) % 2 === 1
 
   const handleErase = () => {
     setName('')

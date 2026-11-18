@@ -99,6 +99,8 @@ export function LoadingLevel({ onComplete, onPenalty }: LevelProps) {
             onPointerDown={startHolding}
             onPointerUp={stopHolding}
             onPointerLeave={stopHolding}
+            onPointerCancel={stopHolding}
+            onContextMenu={(event) => event.preventDefault()}
             onKeyDown={handleKeyDown}
             onKeyUp={handleKeyUp}
           >

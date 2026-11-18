@@ -62,9 +62,12 @@ export function PasswordLevel({ playerName, onComplete, onPenalty }: LevelProps)
           />
           <ActionButton
             aria-label="Segure para ver a senha"
+            className="hold-button"
             onPointerDown={() => setIsRevealing(true)}
             onPointerUp={() => setIsRevealing(false)}
             onPointerLeave={() => setIsRevealing(false)}
+            onPointerCancel={() => setIsRevealing(false)}
+            onContextMenu={(event) => event.preventDefault()}
           >
             👁
           </ActionButton>
