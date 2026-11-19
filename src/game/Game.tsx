@@ -1,7 +1,6 @@
 import { useReducer, useRef, useState } from 'react'
 import { initialScoreState, scoreReducer } from '../score/scoreReducer'
 import { useScoreLog } from '../score/useScoreLog'
-import { ActionButton } from '../ui/ActionButton'
 import { useEnterTriggersCta } from '../ui/useEnterTriggersCta'
 import { useIsMobile } from '../ui/useIsMobile'
 import { LEVELS } from './levels'
@@ -16,6 +15,7 @@ export function Game() {
   const [levelIndex, setLevelIndex] = useState(0)
   const [rewardedLevelIds, setRewardedLevelIds] = useState<ReadonlySet<string>>(new Set())
   const [playerName, setPlayerName] = useState('')
+  const [runCount, setRunCount] = useState(0)
   const isMobile = useIsMobile()
 
   useScoreLog(score)
@@ -28,6 +28,7 @@ export function Game() {
   const advertisedTotal = Math.min(levelNumber + LEVELS_AHEAD_SHOWN, LEVELS.length)
 
   const restart = () => {
+    setRunCount(runCount + 1)
     dispatch({ type: 'reset' })
     setRewardedLevelIds(new Set())
     setPlayerName('')
@@ -56,12 +57,13 @@ export function Game() {
   }
 
   const activeVariant = isMobile && level.mobileVariant ? level.mobileVariant : level
-  const variantKey = activeVariant === level ? level.id : `${level.id}-mobile`
+  const variantId = activeVariant === level ? level.id : `${level.id}-mobile`
+  const variantKey = `${runCount}-${variantId}`
   const LevelComponent = activeVariant.Component
 
   return (
     <div className="app">
-      <SiteHeader onPenalty={handlePenalty} />
+      <SiteHeader onBack={isFirstLevel ? undefined : handleBack} onHome={restart} />
       <p className="site-notice">
         Após o cadastro das informações básicas, iniciaremos o seu teste de stress e compartilharemos a sua nota.
       </p>
@@ -78,13 +80,6 @@ export function Game() {
           onPenalty={handlePenalty}
           onPlayerNameChange={setPlayerName}
         />
-        {!isFirstLevel && (
-          <div className="stage-back">
-            <ActionButton icon="back" onClick={handleBack}>
-              Voltar
-            </ActionButton>
-          </div>
-        )}
       </main>
     </div>
   )

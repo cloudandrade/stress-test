@@ -95,11 +95,6 @@ button {
   font-size: clamp(1.6rem, 4vw, 2.2rem);
 }
 
-.stage-back {
-  display: flex;
-  justify-content: flex-start;
-  margin-top: 16px;
-}
 
 .card {
   background: var(--surface);
