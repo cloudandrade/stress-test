@@ -34,6 +34,25 @@ No fim, o certificado te dá um título conforme a pontuação:
 - **Sobrevivente da Interface**: de 0 a 99 pontos
 - **Mestre Zen da UX Hostil**: 100 pontos ou mais
 
+## Telas
+
+| | |
+|---|---|
+| ![Banner de cookies](docs/screenshots/01-cookies.png) | ![Cookies esquecidos](docs/screenshots/02-cookies-esquecidos.png) |
+| Fase 1: o banner de cookies | Aceitou? Esquecemos. Aceita de novo? |
+| ![Nome do pet](docs/screenshots/03-nome-do-pet.png) | ![Nome embaralhado](docs/screenshots/04-nome-embaralhado.png) |
+| Fase 2: o nome começa pelo do pet | A confirmação embaralha tudo |
+| ![Termos](docs/screenshots/05-termos.png) | ![Regras da senha](docs/screenshots/06-senha-regras.png) |
+| Fase 3: termos que exigem leitura até o fim | Fase 4: as regras da senha aparecem uma a uma |
+| ![País](docs/screenshots/07-pais.png) | ![Botão fugitivo](docs/screenshots/08-botao-fugitivo.png) |
+| Fase 5: a detecção automática erra o país | Fase 6: o botão foge do cursor |
+| ![Celular](docs/screenshots/09-celular.png) | ![Volume](docs/screenshots/10-volume.png) |
+| Fase 7: DDD por extenso e número no slider | Fase 8: o volume só atualiza quando você solta |
+| ![Captcha](docs/screenshots/11-captcha.png) | ![Carregamento em 99%](docs/screenshots/12-carregamento-99.png) |
+| Fase 9: um captcha com instruções criativas | Fase 10: a barra trava em 99% |
+| ![Certificado](docs/screenshots/13-certificado.png) | ![Mobile](docs/screenshots/14-mobile-cookies.png) |
+| O certificado, com o nome escrito errado | No celular |
+
 ## Rodando localmente
 
 Precisa de Node.js 20 ou superior.
