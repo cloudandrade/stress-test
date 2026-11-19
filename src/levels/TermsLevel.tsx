@@ -1,62 +1,83 @@
 import { useRef, useState, type UIEvent } from 'react'
 import type { LevelProps } from '../game/types'
 import { ActionButton } from '../ui/ActionButton'
+import { TERMS_CLAUSES } from './termsClauses'
 
 const SCROLL_TOLERANCE_PX = 4
 const SKIP_PENALTY = 2
 const KEEP_READING_PENALTY = 1
 
-const TERMS_CLAUSES = [
-  'Ao ler esta cláusula, você concorda em ter lido esta cláusula.',
-  'O usuário cede ao site o direito de escolher o toque do seu despertador.',
-  'Todas as segundas-feiras serão consideradas segundas-feiras, sem exceção.',
-  'O site pode alterar estes termos a qualquer momento, inclusive agora.',
-  'Fica proibido sentir saudade do botão “Voltar”.',
-  'Em caso de dúvida, a culpa é do usuário. Em caso de certeza, também.',
-  'O usuário concorda que pão de queijo não é pão nem queijo.',
-  'Seus dados serão tratados com o máximo de carinho que um banco de dados consegue ter.',
-  'A rolagem desta caixa conta como exercício físico para fins de declaração.',
-  'Ninguém lê até aqui. Se você leu, parabéns: isso não muda nada.',
-  'Esta é a penúltima cláusula. A última está logo abaixo, confia.',
-  'Fim. Agora confira as caixinhas aí embaixo com muita atenção.',
+type ReadingProgress = 'unread' | 'reachedBottom' | 'returnedToTop'
+
+type AgreementOption = 'readAndDisagree' | 'readButNotAgree' | 'readAndAgree'
+
+const AGREEMENT_OPTIONS: { value: AgreementOption; label: string }[] = [
+  { value: 'readAndDisagree', label: 'Li e discordo' },
+  { value: 'readButNotAgree', label: 'Li mas não concordo' },
+  { value: 'readAndAgree', label: 'Li e concordo' },
 ]
 
-type Requirement = { isMet: boolean; message: string }
+const INITIAL_AGREEMENTS: ReadonlySet<AgreementOption> = new Set(['readAndDisagree'])
+
+function findAgreementError(agreements: ReadonlySet<AgreementOption>): string {
+  if (!agreements.has('readAndAgree')) {
+    return 'Você ainda não concordou com os termos.'
+  }
+  if (agreements.size > 1) {
+    return 'Você não pode concordar e discordar ao mesmo tempo. Decida-se.'
+  }
+  return ''
+}
+
+function findReadingError(progress: ReadingProgress): string {
+  if (progress === 'unread') {
+    return 'Você não leu os termos até o fim. A gente sabe.'
+  }
+  if (progress === 'reachedBottom') {
+    return 'Agora volte ao topo dos termos para provar que leu tudo de novo.'
+  }
+  return ''
+}
 
 export function TermsLevel({ onComplete, onPenalty }: LevelProps) {
   const termsBoxRef = useRef<HTMLDivElement>(null)
-  const [hasReadToEnd, setHasReadToEnd] = useState(false)
-  const [doesNotDisagree, setDoesNotDisagree] = useState(false)
-  const [wantsEmails, setWantsEmails] = useState(true)
-  const [refusesDataSharing, setRefusesDataSharing] = useState(false)
+  const [readingProgress, setReadingProgress] = useState<ReadingProgress>('unread')
+  const [agreements, setAgreements] = useState(INITIAL_AGREEMENTS)
   const [feedback, setFeedback] = useState('')
-
-  const requirements: Requirement[] = [
-    { isMet: hasReadToEnd, message: 'Você não leu os termos até o fim. A gente sabe.' },
-    { isMet: doesNotDisagree, message: 'Você precisa não discordar dos termos.' },
-    { isMet: !wantsEmails, message: 'Você ainda vai receber 37 e-mails por dia. Tem certeza?' },
-    { isMet: refusesDataSharing, message: 'Seus dados ainda vão ser compartilhados. Releia as caixinhas.' },
-  ]
-  const canContinue = requirements.every((requirement) => requirement.isMet)
 
   const handleScroll = (event: UIEvent<HTMLDivElement>) => {
     const { scrollTop, clientHeight, scrollHeight } = event.currentTarget
-    if (scrollTop + clientHeight >= scrollHeight - SCROLL_TOLERANCE_PX) {
-      setHasReadToEnd(true)
+    const isAtBottom = scrollTop + clientHeight >= scrollHeight - SCROLL_TOLERANCE_PX
+    const isAtTop = scrollTop <= SCROLL_TOLERANCE_PX
+    if (isAtBottom) {
+      setReadingProgress((progress) => (progress === 'unread' ? 'reachedBottom' : progress))
+    }
+    if (isAtTop) {
+      setReadingProgress((progress) => (progress === 'reachedBottom' ? 'returnedToTop' : progress))
     }
   }
 
+  const toggleAgreement = (option: AgreementOption) => {
+    const nextAgreements = new Set(agreements)
+    if (nextAgreements.has(option)) {
+      nextAgreements.delete(option)
+    } else {
+      nextAgreements.add(option)
+    }
+    setAgreements(nextAgreements)
+  }
+
   const handleKeepReading = () => {
+    setReadingProgress('unread')
     termsBoxRef.current?.scrollTo({ top: 0 })
-    setHasReadToEnd(false)
-    setFeedback('Voltamos ao topo para você ler com mais carinho.')
+    setFeedback('Voltamos ao topo para você ler tudo com mais carinho.')
     onPenalty('Pediu para continuar lendo', KEEP_READING_PENALTY)
   }
 
   const handleContinue = () => {
-    const unmetRequirement = requirements.find((requirement) => !requirement.isMet)
-    if (unmetRequirement) {
-      setFeedback(unmetRequirement.message)
+    const error = findReadingError(readingProgress) || findAgreementError(agreements)
+    if (error) {
+      setFeedback(error)
       onPenalty('Tentou pular os termos', SKIP_PENALTY)
       return
     }
@@ -72,39 +93,23 @@ export function TermsLevel({ onComplete, onPenalty }: LevelProps) {
           ))}
         </ol>
       </div>
-      <label className="checkbox">
-        <input
-          type="checkbox"
-          checked={doesNotDisagree}
-          onChange={(event) => setDoesNotDisagree(event.target.checked)}
-        />
-        Não discordo dos termos
-      </label>
-      <label className="checkbox">
-        <input type="checkbox" checked={wantsEmails} onChange={(event) => setWantsEmails(event.target.checked)} />
-        Não quero deixar de receber 37 e-mails promocionais por dia
-      </label>
-      <label className="checkbox">
-        <input
-          type="checkbox"
-          checked={refusesDataSharing}
-          onChange={(event) => setRefusesDataSharing(event.target.checked)}
-        />
-        Marque para não deixar de não compartilhar seus dados
-      </label>
+      {AGREEMENT_OPTIONS.map((option) => (
+        <label key={option.value} className="checkbox">
+          <input
+            type="checkbox"
+            checked={agreements.has(option.value)}
+            onChange={() => toggleAgreement(option.value)}
+          />
+          {option.label}
+        </label>
+      ))}
       {feedback && (
         <p className="error" role="alert">
           {feedback}
         </p>
       )}
       <div className="actions">
-        <ActionButton
-          className={canContinue ? '' : 'btn--disabled-look'}
-          aria-disabled={!canContinue}
-          onClick={handleContinue}
-        >
-          Continuar
-        </ActionButton>
+        <ActionButton onClick={handleContinue}>Continuar</ActionButton>
         <ActionButton tone="loud" icon="next" onClick={handleKeepReading}>
           Continuar lendo
         </ActionButton>

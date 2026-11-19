@@ -62,6 +62,9 @@ export function Game() {
   return (
     <div className="app">
       <SiteHeader onPenalty={handlePenalty} />
+      <p className="site-notice">
+        Após o cadastro das informações básicas, iniciaremos o seu teste de stress e compartilharemos a sua nota.
+      </p>
       <main ref={stageRef} className="stage">
         <p className="stage-progress">
           Fase {levelNumber} de {advertisedTotal}

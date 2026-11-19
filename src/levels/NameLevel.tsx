@@ -50,11 +50,12 @@ export function NameLevel({ onComplete, onPenalty, onPlayerNameChange }: LevelPr
         <p className="step-prompt">
           Seu nome é <strong>{garbledName}</strong>?
         </p>
-        <div className="actions">
-          <ActionButton onClick={handleFix}>Não, corrigir</ActionButton>
+        <div className="actions actions--stacked">
           <ActionButton tone="loud" icon="next" onClick={handleProceed}>
-            Sim, prosseguir
+            Não gostaria de corrigir
           </ActionButton>
+          <ActionButton onClick={handleFix}>Não, gostaria de corrigir</ActionButton>
+          <ActionButton onClick={handleProceed}>Não, gostaria de prosseguir</ActionButton>
         </div>
       </div>
     )
